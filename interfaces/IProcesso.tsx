@@ -6,3 +6,5 @@ export interface IProcesso {
     data_abertura: number;
     status: string;
 }
+
+
