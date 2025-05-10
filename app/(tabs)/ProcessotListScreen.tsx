@@ -1,16 +1,56 @@
-import React, { useState } from 'react';
-import { StyleSheet, TouchableOpacity, Text } from 'react-native';
-
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TouchableOpacity, Text,  View } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import Processo from '@/components/processos/Processo';
 import MyScrollView from '@/components/MyScrollView';
 import ProcessoModal from '@/components/modal/ProcessoModal';
 import { IProcesso } from '@/interfaces/IProcesso';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Location from 'expo-location';
+
 
 export default function ProcessoListScreen() {
   const [processos, setProcessos] = useState<IProcesso[]>([]);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [selectedProcesso, setSelectedProcesso] = useState<IProcesso>();
+
+  const [location, setLocation] = useState ({});
+  const [errorMensage, setErrorMensage] = useState ('');
+
+  useEffect(() => {
+    async function getData() {
+      try {
+        const data = await AsyncStorage.getItem("@processosApp:processos");
+        const processosData = data != null ? JSON.parse(data) : [];
+        setProcessos(processosData)
+      } catch (e) {
+        
+      }
+    }
+
+    getData()
+  }, [])
+
+  useEffect(() => {
+    (async () => {
+      let {status} = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMensage('Permission to acessclocation was denied');
+        return
+      }
+      
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+
+    })();
+  }, [])
+
+  let text = 'Waiting...';
+  if (errorMensage) {
+    text = errorMensage;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
 
   const onAdd = (
     num_processo: number,
@@ -31,6 +71,7 @@ export default function ProcessoListScreen() {
       };
       const processosPlus: IProcesso[] = [...processos, newProcesso];
       setProcessos(processosPlus);
+      AsyncStorage.setItem("@processosApp:processos", JSON.stringify(processosPlus))
     } else {
       processos.forEach(processo => {
         if (processo.id == id) {
@@ -40,7 +81,9 @@ export default function ProcessoListScreen() {
           processo.data_abertura = data_abertura
           processo.status = status
         }
-      })
+      });
+
+      AsyncStorage.setItem("@processosApp:processos", JSON.stringify(processos))
     }
     setModalVisible(false);
   };
@@ -53,6 +96,7 @@ export default function ProcessoListScreen() {
       }
     }
     setProcessos(newProcessos);
+    AsyncStorage.setItem("@processosApp:processos", JSON.stringify(newProcessos))
     setModalVisible(false);
   };
   const openModal = () => {
@@ -89,6 +133,8 @@ export default function ProcessoListScreen() {
         ))}
       </ThemedView>
 
+      <View><Text style={styles.location}>{text}</Text></View>
+
       <ProcessoModal
         visible={modalVisible}
         onCancel={closeModal}
@@ -115,4 +161,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     paddingHorizontal: 20,
   },
+  location: {
+    backgroundColor : 'orange',
+    textAlign: 'center'
+  }
 });
