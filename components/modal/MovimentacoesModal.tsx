@@ -1,31 +1,44 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, TouchableOpacity, Modal, TextInput } from 'react-native';
-import { useState } from 'react';
+import { IMovimentacoes } from '@/interfaces/IMovimentacoes';
 
-export type MovimentacoesModalProps = {
+export type MovimentacaoModalProps = {
   visible: boolean;
-  onAdd: (id_processo : number, tipo : string, desc : string, data_movimentacao : number) => void;
+  onAdd: (id_processo: number, tipo: string, desc: string, data_movimentacao: number, id: number) => void;
   onCancel: () => void;
+  onDelete: (id: number) => void;
+  movimentacao?: IMovimentacoes;
 };
 
 export default function MovimentacoesModal({
   visible,
   onAdd,
   onCancel,
-}: MovimentacoesModalProps) {
+  onDelete,
+  movimentacao
+}: MovimentacaoModalProps) {
   const [id_processo, setIdProcesso] = useState('');
   const [tipo, setTipo] = useState('');
   const [desc, setDesc] = useState('');
   const [data_movimentacao, setDataMovimentacao] = useState('');
+  const [id, setId] = useState<number>(0);
 
-  const handleAdd = () => {
-    onAdd(
-      Number(id_processo),
-      tipo,
-      desc,
-      Number(data_movimentacao)
-    );
-  };
+  useEffect(() => {
+    if (movimentacao) {
+      setIdProcesso(movimentacao.id_processo.toString());
+      setTipo(movimentacao.tipo);
+      setDesc(movimentacao.desc);
+      setDataMovimentacao(movimentacao.data_movimentacao.toString());
+      setId(movimentacao.id);
+    } else {
+      setIdProcesso('');
+      setTipo('');
+      setDesc('');
+      setDataMovimentacao('');
+      setId(0);
+    }
+  }, [movimentacao]);
+  
 
   return (
     <Modal visible={visible} animationType="fade" transparent={true}>
@@ -33,15 +46,15 @@ export default function MovimentacoesModal({
         <View style={styles.boxContainer}>
           <TextInput
             style={styles.boxInput}
-            placeholder="Id processo"
-            value={id_processo}
+            placeholder="ID do Processo"
+            value={id_processo.toString()}
             onChangeText={setIdProcesso}
             keyboardType="numeric"
             autoFocus
           />
           <TextInput
             style={styles.boxInput}
-            placeholder="Título"
+            placeholder="Típo"
             value={tipo}
             onChangeText={setTipo}
           />
@@ -54,15 +67,26 @@ export default function MovimentacoesModal({
           <TextInput
             style={styles.boxInput}
             placeholder="Data de Abertura"
-            value={data_movimentacao}
+            value={data_movimentacao.toString()}
             onChangeText={setDataMovimentacao}
+            keyboardType="numeric"
           />
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.buttonAdd} onPress={handleAdd}>
+            <TouchableOpacity
+              style={styles.buttonAdd}
+              onPress={() => onAdd(Number(id_processo), tipo, desc, Number(data_movimentacao), id)}
+            >
               <Text style={styles.buttonText}>Adicionar</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonCancel} onPress={onCancel}>
-              <Text style={styles.buttonText}>Cancelar</Text>
+            <TouchableOpacity onPress={onCancel} style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.buttonCancel}
+              onPress={() => onDelete(id)}
+              disabled={id <= 0}
+            >
+              <Text style={styles.buttonText}>Deletar</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -120,5 +144,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#bbb',
     margin: 5,
     paddingHorizontal: 10,
+  },
+
+  cancelButton: {
+    backgroundColor: '#FFD700',
+    borderRadius: 5,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 10,
+    padding: 20,
+  },
+
+  cancelButtonText: {
+    fontWeight: 'bold',
+    color: '#FFF',
   },
 });
