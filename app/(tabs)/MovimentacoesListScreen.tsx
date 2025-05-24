@@ -7,6 +7,7 @@ import MyScrollView from '@/components/MyScrollView';
 import MovimentacoesModal from '@/components/modal/MovimentacoesModal';
 import { IMovimentacoes } from '@/interfaces/IMovimentacoes';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 export default function MovimentacoesListScreen() {
   const [movimentacoes, setMovimentacoes] = useState<IMovimentacoes[]>([]);
@@ -20,7 +21,7 @@ export default function MovimentacoesListScreen() {
         const movimentacoesData = data != null ? JSON.parse(data) : [];
         setMovimentacoes(movimentacoesData)
       } catch (e) {
-        
+
       }
     }
     getData()
@@ -28,7 +29,7 @@ export default function MovimentacoesListScreen() {
 
 
   const onAdd = (
-    id_processo : number,
+    id_processo: number,
     tipo: string,
     desc: string,
     data_movimentacao: number,
@@ -79,40 +80,43 @@ export default function MovimentacoesListScreen() {
     setSelectedMovimentacao(selectedMovimentacao);
     setModalVisible(true);
   };
+  const navigateToDetails = (selectedMovimentacao: IMovimentacoes) => {
+    router.push({ pathname: '/screens/MovimentacoesDetalhesScreen', params: { movimentacaoId: selectedMovimentacao.id } })
+  };
   const closeModal = () => {
     setModalVisible(false);
   };
 
   return (
-   <MyScrollView headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}>
-         <ThemedView style={styles.headerContainer}>
-           <TouchableOpacity onPress={openModal}>
-             <Text style={styles.headerButton}>+</Text>
-           </TouchableOpacity>
-         </ThemedView>
-   
-         <ThemedView style={styles.container}>
-           {movimentacoes.map((movimentacao) => (
-             <TouchableOpacity key={movimentacao.id} onPress={() => openEditModal(movimentacao)}>
-               <Movimentacao
-                id_processo={movimentacao.id_processo}
-                 tipo ={movimentacao.tipo}
-                 desc={movimentacao.desc}
-                 data_movimentacao={movimentacao.data_movimentacao}
-               />
-             </TouchableOpacity>
-           ))}
-         </ThemedView>
-   
-   
-         <MovimentacoesModal
-           visible={modalVisible}
-           onCancel={closeModal}
-           onAdd={onAdd}
-           onDelete={onDelete}
-           movimentacao={selectedMovimentacao}
-         />
-       </MyScrollView>
+    <MyScrollView headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}>
+      <ThemedView style={styles.headerContainer}>
+        <TouchableOpacity onPress={openModal}>
+          <Text style={styles.headerButton}>+</Text>
+        </TouchableOpacity>
+      </ThemedView>
+
+      <ThemedView style={styles.container}>
+        {movimentacoes.map((movimentacao) => (
+          <TouchableOpacity key={movimentacao.id} onPress={() => navigateToDetails(movimentacao)}>
+            <Movimentacao
+              id_processo={movimentacao.id_processo}
+              tipo={movimentacao.tipo}
+              desc={movimentacao.desc}
+              data_movimentacao={movimentacao.data_movimentacao}
+            />
+          </TouchableOpacity>
+        ))}
+      </ThemedView>
+
+
+      <MovimentacoesModal
+        visible={modalVisible}
+        onCancel={closeModal}
+        onAdd={onAdd}
+        onDelete={onDelete}
+        movimentacao={selectedMovimentacao}
+      />
+    </MyScrollView>
   );
 }
 

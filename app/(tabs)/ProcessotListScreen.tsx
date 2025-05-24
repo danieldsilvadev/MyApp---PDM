@@ -7,6 +7,7 @@ import ProcessoModal from '@/components/modal/ProcessoModal';
 import { IProcesso } from '@/interfaces/IProcesso';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
+import { router } from 'expo-router';
 
 
 export default function ProcessoListScreen() {
@@ -107,6 +108,9 @@ export default function ProcessoListScreen() {
     setSelectedProcesso(selectedProcesso);
     setModalVisible(true);
   };
+  const navigateToDetails = (selectedProcesso: IProcesso) => {
+    router.push({pathname : '/screens/ProcessoDetalhesScreen', params : {processoId : selectedProcesso.id}})
+  }
   const closeModal = () => {
     setModalVisible(false);
   };
@@ -121,7 +125,7 @@ export default function ProcessoListScreen() {
 
       <ThemedView style={styles.container}>
         {processos.map((processo) => (
-          <TouchableOpacity key={processo.id} onPress={() => openEditModal(processo)}>
+          <TouchableOpacity key={processo.id} onPress={() => navigateToDetails(processo)}>
             <Processo
               num_processo={processo.num_processo}
               titulo={processo.titulo}

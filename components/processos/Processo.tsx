@@ -21,7 +21,7 @@ export default function Processo({
       <Text style={styles.title}>{titulo}</Text>
       <Text style={styles.subTitle}>{desc}</Text>
       <Text style={styles.info}>Número do Processo: {num_processo}</Text>
-      <Text style={styles.info}>Data de Abertura: {new Date(data_abertura).toLocaleDateString()}</Text>
+      <Text style={styles.info}>Data de Abertura: {data_abertura}</Text>
       <Text style={styles.info}>Status: {status}</Text>
     </View>
   );

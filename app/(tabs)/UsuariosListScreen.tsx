@@ -7,6 +7,7 @@ import MyScrollView from '@/components/MyScrollView';
 import UsuarioModal from '@/components/modal/UsuarioModal';
 import { IUsuario } from '@/interfaces/IUsuario';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 export default function UsuariosListScreen() {
   const [usuarios, setUsuarios] = useState<IUsuario[]>([]);
@@ -73,6 +74,9 @@ export default function UsuariosListScreen() {
     setSelectedUsuario(selectedUsuario);
     setModalVisible(true);
   };
+  const navigateToDetails = (selectedUsuario: IUsuario) => {
+      router.push({pathname : '/screens/UsuarioDetalhesScreen', params : {usuarioId : selectedUsuario.id}})
+    }
   const closeModal = () => {
     setModalVisible(false);
   };
